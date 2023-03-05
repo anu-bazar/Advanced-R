@@ -96,3 +96,10 @@ t.test(monday_data$aktiv_fertozott, other_data$aktiv_fertozott, var.equal = TRUE
 #The p-value of 0.9683 is greater than the commonly used significance level of 0.05, 
 #indicating that we fail to reject the null hypothesis that there is no difference in
 #daily infections between Mondays and other days of the week.
+
+#install the package
+install.packages("praise")
+#load the library
+library(praise)
+#> praise()
+#[1] "You are doozie!"
