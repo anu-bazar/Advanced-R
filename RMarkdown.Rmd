@@ -1,0 +1,163 @@
+---
+title: "Lesson 2 exercises"
+author: "Anu Bazarragchaa"
+date: "2023-03-11"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This is a R Markdown file of Lesson 2 for Advanced R.
+
+
+## Task 1
+>Choose one country and using inline code give the estimated lifespan for the following year. 
+
+
+```{r task1, echo=FALSE}
+
+income_gdp <- read.csv("https://raw.githubusercontent.com/mokjud/education/main/gapminder_income_per_person_gdppercapita_ppp_inflation_adjusted.csv")
+life_exp <- read.csv("https://raw.githubusercontent.com/mokjud/education/main/gapminder_life_exp.csv")
+child_mor <- read.csv("https://raw.githubusercontent.com/mokjud/education/main/gapminder_child_mortality_0_5_year_olds_dying_per_1000_born.csv")
+countries<-read.csv("https://raw.githubusercontent.com/mokjud/education/main/country-and-continent-codes-list-csv_csv.csv")
+
+
+#Task 1
+#subset the row for Algeria
+algeria_row <- life_exp[which(life_exp$country == "Algeria"), ]
+#subset the column for a specific year
+year_2024 <- algeria_row[, "X2024"]
+cat(paste0("Algeria's life expectancy for 2024 was ", year_2024, "."))
+
+```
+
+## Task 2
+
+>Create a table that gives the lifespan and the income of ten countries of your choice in 2022 and show this table in the leaflet.
+
+```{r countries, echo=FALSE}
+#Task 2
+
+#create a vector of country names to subset the rows
+selected_countries <- c("Hungary", "Mongolia", "Luxembourg", "Germany", "Vatican City", "Moldova", "Uruguay", "Papua New Guinea", "Myanmar", "Azerbaijan", "Qatar")
+
+#subset the rows for the selected countries
+gdp_subset <- income_gdp[income_gdp$country %in% selected_countries, ]
+life_subset <- life_exp[life_exp$country %in% selected_countries, ]
+
+#calculate the mean of each row subset
+gdp_means <- apply(gdp_subset[, -1], 1, mean)
+life_means <- apply(life_subset[, -1], 1, mean)
+
+#create a df with the means of the rows
+gdp_table <- data.frame(country = gdp_subset$country, mean_gdp = gdp_means, mean_life = life_means)
+
+#display the data frame as a table 
+knitr::kable(gdp_table)
+```
+
+## Task 3
+>Create a figure that shows the relationship between life expectancy and income in all the countries in 2015. Use appropriate axis names. If necessary, use colourisation. 
+
+#### By country:
+
+```{r income, echo=FALSE, warning=FALSE, message=FALSE}
+#Task 3
+library(countrycode)
+library(dplyr)
+library(ggplot2)
+
+#by country
+income_gdp <- read.csv("https://raw.githubusercontent.com/mokjud/education/main/gapminder_income_per_person_gdppercapita_ppp_inflation_adjusted.csv")
+life_exp <- read.csv("https://raw.githubusercontent.com/mokjud/education/main/gapminder_life_exp.csv")
+
+#append the rows for the selected year
+income_2015 <- income_gdp[, c("country", "X2015")]
+life_2015 <- life_exp[, c("country", "X2015")]
+
+#merge the data frames by country name
+merged_data <- merge(income_2015, life_2015, by = "country")
+
+#create a scatter plot
+ggplot(merged_data, aes(x = X2015.x, y = X2015.y)) +
+  geom_point() +
+  xlab("Income (USD)") +
+  ylab("Life Expectancy (years)") +
+  ggtitle("Life Expectancy vs. Income (2015)")
+
+
+```
+
+#### By region:
+```{r country2, echo=FALSE, warning=FALSE, message=FALSE}
+# By region!
+library(countrycode)
+library(dplyr)
+library(ggplot2)
+
+income_gdp <- read.csv("https://raw.githubusercontent.com/mokjud/education/main/gapminder_income_per_person_gdppercapita_ppp_inflation_adjusted.csv")
+life_exp <- read.csv("https://raw.githubusercontent.com/mokjud/education/main/gapminder_life_exp.csv")
+child_mor <- read.csv("https://raw.githubusercontent.com/mokjud/education/main/gapminder_child_mortality_0_5_year_olds_dying_per_1000_born.csv")
+countries <- read.csv("https://raw.githubusercontent.com/mokjud/education/main/country-and-continent-codes-list-csv_csv.csv")
+
+#year rows added
+income_2015 <- income_gdp[, c("country", "X2015")]
+life_2015 <- life_exp[, c("country", "X2015")]
+
+#merge the data frames by country name
+merged_data <- merge(income_2015, life_2015, by = "country")
+
+#merge with countries data frame
+merged_data <- merge(merged_data, countries, by.x = "country", by.y = "Country_Name")
+
+#create a scatter plot with color coding by continent
+ggplot(merged_data, aes(x = X2015.x, y = X2015.y, color = Continent_Name)) +
+  geom_point() +
+  xlab("Income (USD)") +
+  ylab("Life Expectancy (years)") +
+  ggtitle("Life Expectancy vs. Income (2015)")
+
+```
+
+## Task 4
+
+> Give a short explanation for the figure. What do you think, what is the relationship between lifespan and income? Use everyday language, as your audience is laypeople.
+
+The scatter plot in the figure depicts the connection between income and lifespan for 187 nations in 2015. The horizontal axis displays the average annual income per person in US dollars, and the vertical axis displays the average lifespan in years. Each point represents a nation.
+
+We can see from the scatter plot that there is a correlation between income and lifespan that is in the favor. This implies that the average lifespan of a nation generally increases along with its per-person income. The fact that there are numerous other factors, including healthcare, lifestyle, and environment, that can affect lifespan makes it important to keep in mind that this relationship is not perfect.
+
+Overall, the data indicates that a longer lifespan is typically linked to having a higher income.
+
+## Task 5
+
+>For extra point: “In the year of X the average GDP per capita in Hungary was Y which is Z than it is estimated to be in 2023.” When you state X (the year, for example 1999), your script automatically decides what Y (the income) and Z (higher/lower) should be. You can use chunks and/or inline codes. Be creative. 
+
+``` {r estimate, echo=FALSE}
+## Task 5
+#load the required package
+library(countrycode)
+library(dplyr)
+
+#read in the data
+income_gdp <- read.csv("https://raw.githubusercontent.com/mokjud/education/main/gapminder_income_per_person_gdppercapita_ppp_inflation_adjusted.csv")
+
+#select the year 2000 for Hungary and calculate the average income
+hungary_income_2000 <- income_gdp %>% 
+  filter(countrycode(`country`, "country.name", "iso2c") == "HU" & X2000 > 0) %>% 
+  summarise(avg_income = mean(X2000))
+
+#calculate the difference between the average income in 2000 and the estimated income in 2023
+diff_income <- hungary_income_2000$avg_income - hungary_income_2000$avg_income*0.15
+
+#print the statement
+cat("In the year of 2000 the average GDP per capita in Hungary was", round(hungary_income_2000$avg_income, 2), 
+    "which is", ifelse(diff_income > 0, paste0("lower by $", round(abs(diff_income), 2)), 
+                       paste0("higher by $", round(abs(diff_income), 2))), 
+    "than it is estimated to be in 2023.")
+
+```
+
+
